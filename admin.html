@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Générateur Calendrier IFS</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #e0e0e0; padding: 20px; display: flex; height: 100vh; margin: 0; box-sizing: border-box; }
+        .col { flex: 1; display: flex; flex-direction: column; background: white; margin: 10px; border-radius: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        .scroll-area { flex: 1; overflow-y: auto; padding-right: 10px; }
+        
+        h2 { border-bottom: 2px solid #b3000c; color: #b3000c; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Items Source */
+        .q-item { background: #f9f9f9; border-left: 4px solid #aaa; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .q-item:hover { background: #eee; border-left-color: #b3000c; transform: translateX(2px); }
+        .badge-cat { font-size: 0.7rem; background: #ddd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 5px; color: #333; }
+
+        /* Items Sélectionnés */
+        .day-card { border: 2px solid #1e8449; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fdfefe; position: relative; }
+        .day-num { position: absolute; top: -10px; left: -10px; background: #1e8449; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        label { font-weight: bold; font-size: 0.8rem; display: block; margin-top: 8px; color: #555; }
+        input[type="text"], textarea { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-family: sans-serif; box-sizing: border-box; }
+        .drive-input { border-color: #f39c12; background: #fffcf5; }
+
+        .btn { cursor: pointer; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; color: white; margin-top: 10px; }
+        .btn-gen { background: #b3000c; width: 100%; font-size: 1.1rem; }
+        .btn-del { background: #c0392b; font-size: 0.7rem; padding: 5px 10px; float: right; margin-top: -5px; }
+
+        .file-input-wrapper {
+            background: #ecf0f1; border: 2px dashed #bdc3c7; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 15px; cursor: pointer;
+        }
+        .file-input-wrapper:hover { background: #dfe6e9; border-color: #95a5a6; }
+        #jsonFileInput { display: none; }
+
+        #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:99; }
+        #modalContent { background: white; width: 70%; height: 70%; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+    <div class="col">
+        <h2>1. Banque de Questions</h2>
+        <label for="jsonFileInput" class="file-input-wrapper">
+            📂 Sélectionnez <strong>ifs-questions-corrige.json</strong>
+        </label>
+        <input type="file" id="jsonFileInput" accept=".json" onchange="handleFileUpload(this)">
+
+        <input type="text" id="search" placeholder="Rechercher..." onkeyup="filterSource()" style="margin-bottom:10px; display:none;">
+        <div id="loadingInfo" style="font-size:0.8rem; color:#666; margin-bottom:5px;"></div>
+        
+        <div class="scroll-area" id="sourceList"></div>
+    </div>
+
+    <div class="col">
+        <h2>2. Calendrier Configuré (<span id="count">0</span>/25)</h2>
+        <div class="scroll-area" id="calendarList">
+            <p style="text-align:center; color:#888; margin-top:50px;">Chargez le fichier JSON à gauche.</p>
+        </div>
+        <button class="btn btn-gen" onclick="generate()">GÉNÉRER LE CODE FINAL</button>
+    </div>
+
+    <div id="modal">
+        <div id="modalContent">
+            <h3 style="margin-top:0; color:#b3000c;">Code à copier dans index.html :</h3>
+            <textarea id="finalOutput" style="flex:1; font-family:monospace; padding:10px; border:1px solid #ccc;"></textarea>
+            <div style="text-align:right;">
+                <button class="btn" style="background:#555;" onclick="copyToClipboard()">Copier</button>
+                <button class="btn" style="background:#b3000c;" onclick="document.getElementById('modal').style.display='none'">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let sourceDB = [];
+    let calendarData = [];
+
+    // --- LECTURE FICHIER ---
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const json = JSON.parse(e.target.result);
+                if (json.questions && Array.isArray(json.questions)) {
+                    sourceDB = json.questions;
+                    document.getElementById('loadingInfo').innerText = `Chargé : ${sourceDB.length} questions.`;
+                } else if (Array.isArray(json)) {
+                    sourceDB = json;
+                    document.getElementById('loadingInfo').innerText = `Chargé : ${sourceDB.length} questions.`;
+                } else {
+                    throw new Error("Format JSON non reconnu.");
+                }
+                document.getElementById('search').style.display = 'block';
+                renderSource(sourceDB);
+            } catch (err) {
+                alert("Erreur de lecture : " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- AFFICHAGE SOURCE (FIXE) ---
+    function renderSource(list) {
+        const div = document.getElementById('sourceList');
+        div.innerHTML = ""; 
+        
+        const displayList = list.slice(0, 100); 
+
+        displayList.forEach((q) => {
+            const el = document.createElement('div');
+            el.className = "q-item";
+            // Sécurité si q.category est vide
+            el.innerHTML = `
+                <span class="badge-cat">${q.category || 'Général'}</span><br>
+                ${q.question || 'Sans texte'}
+            `;
+            // C'est ici que l'événement clic est ajouté
+            el.onclick = function() { addDay(q); };
+            div.appendChild(el);
+        });
+
+        // La correction est ICI : On utilise appendChild au lieu de innerHTML +=
+        if (list.length > 100) {
+            const more = document.createElement('div');
+            more.style.textAlign = 'center';
+            more.style.color = '#888';
+            more.style.padding = '10px';
+            more.innerHTML = '<i>...utilisez la recherche pour voir la suite...</i>';
+            div.appendChild(more);
+        }
+    }
+
+    function filterSource() {
+        const term = document.getElementById('search').value.toLowerCase();
+        const filtered = sourceDB.filter(q => 
+            (q.question && q.question.toLowerCase().includes(term)) || 
+            (q.category && q.category.toLowerCase().includes(term))
+        );
+        renderSource(filtered);
+    }
+
+    // --- AJOUT AU CALENDRIER ---
+    function addDay(qData) {
+        try {
+            if(calendarData.length >= 25) { alert("Le calendrier est plein (25 jours) !"); return; }
+            
+            // Gestion robuste de l'index correct
+            let correctIdx = 0;
+            if (typeof qData.correctAnswer !== 'undefined') {
+                correctIdx = parseInt(qData.correctAnswer);
+            }
+
+            // Gestion robuste des options
+            let opts = ["Vrai", "Faux"];
+            if(qData.options && Array.isArray(qData.options) && qData.options.length > 0) {
+                opts = [...qData.options];
+            }
+
+            const dayItem = {
+                day: calendarData.length + 1,
+                question: qData.question || "Question vide",
+                options: opts,
+                answer: correctIdx,
+                explanation: qData.explanation || "", 
+                fileName: `Jour_${calendarData.length + 1}.pdf`,
+                driveUrl: ""
+            };
+
+            calendarData.push(dayItem);
+            renderCalendar();
+        } catch(e) {
+            console.error(e);
+            alert("Erreur lors de l'ajout : " + e.message);
+        }
+    }
+
+    // --- RENDU CALENDRIER ---
+    function renderCalendar() {
+        const div = document.getElementById('calendarList');
+        document.getElementById('count').innerText = calendarData.length;
+        
+        if (calendarData.length === 0) {
+            div.innerHTML = `<p style="text-align:center; color:#888; margin-top:50px;">Sélectionnez une question à gauche.</p>`;
+            return;
+        }
+
+        div.innerHTML = "";
+        calendarData.forEach((item, idx) => {
+            const el = document.createElement('div');
+            el.className = "day-card";
+            
+            // Construction des inputs pour les options
+            let optionsHTML = '';
+            item.options.forEach((opt, i) => {
+                optionsHTML += `<input type="text" style="margin-bottom:2px;" value="${opt.replace(/"/g, '&quot;')}" onchange="updateOption(${idx}, ${i}, this.value)">`;
+            });
+
+            el.innerHTML = `
+                <div class="day-num">${idx + 1}</div>
+                <button class="btn btn-del" onclick="removeDay(${idx})">Supprimer</button>
+                
+                <label>Question :</label>
+                <textarea rows="2" onchange="updateDay(${idx}, 'question', this.value)">${item.question}</textarea>
+
+                <div style="margin-top:5px;">
+                    <label>Options :</label>
+                    ${optionsHTML}
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center; margin-top:5px;">
+                    <label>Réponse Correcte (1-${item.options.length}) :</label>
+                    <input type="number" min="1" max="${item.options.length}" style="width:50px" value="${item.answer + 1}" onchange="updateDay(${idx}, 'answer', parseInt(this.value) - 1)">
+                </div>
+                
+                <label>Explication :</label>
+                <textarea rows="2" style="font-size:0.85rem; color:#555;" onchange="updateDay(${idx}, 'explanation', this.value)">${item.explanation}</textarea>
+
+                <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                
+                <label style="color:#d35400;">📄 Nom du PDF :</label>
+                <input type="text" value="${item.fileName}" onchange="updateDay(${idx}, 'fileName', this.value)">
+                
+                <label style="color:#d35400;">🔗 Lien Drive (Partage) :</label>
+                <input type="text" class="drive-input" placeholder="Lien Google Drive..." value="${item.driveUrl}" onchange="updateDay(${idx}, 'driveUrl', this.value)">
+            `;
+            div.appendChild(el);
+        });
+    }
+
+    // --- UTILITAIRES ---
+    window.updateDay = (idx, field, val) => { calendarData[idx][field] = val; }
+    window.updateOption = (dayIdx, optIdx, val) => { calendarData[dayIdx].options[optIdx] = val; }
+    window.removeDay = (idx) => { calendarData.splice(idx, 1); renderCalendar(); }
+
+    function convertLink(url) {
+        if(!url) return "#";
+        const match = url.match(/\/d\/(.+?)\/|id=(.+?)($|&)/);
+        if(match) return `https://drive.google.com/uc?export=download&id=${match[1] || match[2]}`;
+        return url;
+    }
+
+    function generate() {
+        if(calendarData.length === 0) { alert("Ajoutez au moins un jour !"); return; }
+        
+        const exportData = calendarData.map((d, i) => ({
+            day: i + 1,
+            q: d.question,
+            o: d.options,
+            a: d.answer,
+            exp: d.explanation,
+            f: d.fileName,
+            l: convertLink(d.driveUrl)
+        }));
+
+        const jsonStr = JSON.stringify(exportData, null, 4);
+        document.getElementById('finalOutput').value = `const QUIZ_DATA = ${jsonStr};`;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function copyToClipboard() {
+        document.getElementById("finalOutput").select();
+        document.execCommand("copy");
+        alert("Copié !");
+    }
+</script>
+</body>
+</html>
