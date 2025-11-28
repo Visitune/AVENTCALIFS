@@ -1,0 +1,352 @@
+const QUIZ_DATA = [
+    {
+        "day": 1,
+        "q": "Selon l'article 18 du Règlement (CE) n° 178/2002, quelle est l'exigence minimale de traçabilité pour les exploitants du secteur alimentaire ?",
+        "o": [
+            "Traçabilité interne complète incluant les paramètres de cuisson",
+            "Traçabilité 'un pas en avant, un pas en arrière' (Fournisseur immédiat et Client immédiat)",
+            "Traçabilité jusqu'au consommateur final individuel",
+            "Traçabilité uniquement des matières premières importées"
+        ],
+        "a": 1,
+        "exp": "Le règlement impose d'être capable d'identifier toute personne ayant fourni une denrée et toute entreprise à laquelle leurs produits ont été fournis (One step up, one step down).",
+        "f": "Fruits&legumes.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1cImnlyysvEVehhSkt1WzEMrUII44i3Gi"
+    },
+    {
+        "day": 2,
+        "q": "Quelle est la taille minimale des caractères (hauteur de x) pour les mentions obligatoires sur un emballage standard (>80cm²) selon le Règlement INCO 1169/2011 ?",
+        "o": [
+            "0,9 mm",
+            "1,2 mm",
+            "2,0 mm",
+            "3,0 mm"
+        ],
+        "a": 1,
+        "exp": "Le Règlement (UE) n° 1169/2011 impose une taille de caractères minimale de 1,2 mm pour garantir la lisibilité des informations obligatoires.",
+        "f": "emballageF&L.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=171TtyDW9Mo9P7SGD11BU38ra9DKQCv0s"
+    },
+    {
+        "day": 3,
+        "q": "Selon le Règlement (CE) n° 2073/2005, quel est le critère de sécurité pour Listeria monocytogenes dans les produits prêts à consommer permettant sa croissance, avant sortie d'usine ?",
+        "o": [
+            "Absence dans 25 g",
+            "100 UFC/g",
+            "1000 UFC/g",
+            "Absence dans 10 g"
+        ],
+        "a": 0,
+        "exp": "Si le producteur ne peut pas démontrer que le niveau restera <100 UFC/g jusqu'à la fin de la DLC, l'exigence est l'absence dans 25 g à la sortie de production.",
+        "f": "Lsiteria1.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1yCWKZ6lLnffyNCi-3gS0Dgn6_60ysK1X"
+    },
+    {
+        "day": 4,
+        "q": "Combien de principes fondamentaux composent le système HACCP selon le Codex Alimentarius ?",
+        "o": [
+            "5 principes",
+            "7 principes",
+            "12 principes",
+            "14 principes"
+        ],
+        "a": 1,
+        "exp": "Le système HACCP repose sur 7 principes (Analyse des dangers, CCP, Limites critiques, Surveillance, Actions correctives, Vérification, Documentation). Les 12 étapes incluent la préparation.",
+        "f": "CODEX.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1XecFfLnrmpVqM-Fq9UfkbwWHRAG8J21s"
+    },
+    {
+        "day": 5,
+        "q": "Selon le Règlement (UE) 2017/625 (OCR), sur quoi doit être basée la fréquence des contrôles officiels ?",
+        "o": [
+            "Uniquement sur la taille de l'entreprise",
+            "Sur le risque associé aux animaux et denrées, et sur les antécédents de l'opérateur",
+            "Sur un tirage au sort aléatoire",
+            "Sur le chiffre d'affaires de l'entreprise"
+        ],
+        "a": 1,
+        "exp": "Les contrôles officiels doivent être réguliers, inopinés et basés sur le risque (type de produit, process, historique de conformité de l'opérateur).",
+        "f": "DGALertepdf",
+        "l": "https://drive.google.com/uc?export=download&id=12xeHAczovwrfhrJsTbMW5ipCpCfVqdVM"
+    },
+    {
+        "day": 6,
+        "q": "Quel règlement cadre définit les principes généraux pour tous les matériaux destinés à entrer en contact avec des denrées alimentaires (MCDA) ?",
+        "o": [
+            "Règlement (UE) n° 10/2011",
+            "Règlement (CE) n° 1935/2004",
+            "Règlement (CE) n° 2023/2006",
+            "Directive 94/62/CE"
+        ],
+        "a": 1,
+        "exp": "Le Règlement (CE) n° 1935/2004 est le règlement cadre qui pose le principe d'inertie des matériaux (ne pas céder de constituants en quantité dangereuse).",
+        "f": "MCDAtotal.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1W9HydBUTBTpo_Wp91zSa-2qo0xwhp2bE"
+    },
+    {
+        "day": 7,
+        "q": "Quelle est la température maximale autorisée pour le transport des produits surgelés selon la Directive 89/108/CEE ?",
+        "o": [
+            "-12°C",
+            "-18°C",
+            "-24°C",
+            "-4°C"
+        ],
+        "a": 1,
+        "exp": "La température des aliments surgelés doit être maintenue à -18°C ou moins, avec de brèves fluctuations tolérées de maximum 3°C pendant le transport.",
+        "f": "PFAS.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1jq6qIm0GptUc_-MqcsPYWSaVgZSs2NJ9"
+    },
+    {
+        "day": 8,
+        "q": "Selon le Règlement (UE) 2018/775, quand l'origine de l'ingrédient primaire doit-elle être indiquée ?",
+        "o": [
+            "Toujours, pour tous les produits",
+            "Lorsque l'origine du produit fini est indiquée et qu'elle diffère de celle de son ingrédient primaire",
+            "Uniquement pour les produits carnés",
+            "Jamais, c'est facultatif"
+        ],
+        "a": 1,
+        "exp": "Si un produit affiche 'Fabriqué en France' mais que son ingrédient principal (ex: lait, viande) vient d'ailleurs, cette origine différente doit être précisée.",
+        "f": "FDArisk.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1VgibfswZdQ9pT9nh0DtH_79UcZTtuFsY"
+    },
+    {
+        "day": 9,
+        "q": "Quel règlement a remplacé le règlement 1881/2006 concernant les teneurs maximales en contaminants (métaux lourds, mycotoxines) ?",
+        "o": [
+            "Règlement (UE) 2023/915",
+            "Règlement (CE) 396/2005",
+            "Règlement (CE) 852/2004",
+            "Règlement (UE) 2017/2158"
+        ],
+        "a": 0,
+        "exp": "Le Règlement (UE) 2023/915 a abrogé et remplacé le 1881/2006 pour consolider et mettre à jour les limites de contaminants.",
+        "f": "pesticideFrance.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1vat-BFJtB9MgjPAg8xI5uqJNiRb6vNS3"
+    },
+    {
+        "day": 10,
+        "q": "Selon l'Annexe II du Règlement 1169/2011, combien de substances ou produits provoquant des allergies ou intolérances sont à déclaration obligatoire ?",
+        "o": [
+            "8",
+            "10",
+            "12",
+            "14"
+        ],
+        "a": 3,
+        "exp": "Il existe 14 allergènes majeurs (ex: gluten, crustacés, œufs, poisson, arachides, soja, lait, fruits à coque, céleri, moutarde, sésame, sulfites, lupin, mollusques).",
+        "f": "allergen.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1v4ZLPSUyHRRWxcXqmQB2uHw_Fh3PINvt"
+    },
+    {
+        "day": 11,
+        "q": "Selon le Règlement (CE) n° 853/2004, quelle est la température maximale de conservation des viandes hachées ?",
+        "o": [
+            "0°C",
+            "2°C",
+            "4°C",
+            "7°C"
+        ],
+        "a": 1,
+        "exp": "Le règlement spécifique aux denrées animales (853/2004) fixe la limite à 2°C pour les viandes hachées et 4°C pour les préparations de viandes.",
+        "f": "crisefromage.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1Do4u2VdzeJn6d_NSh0fLtcQvXd7yUJan"
+    },
+    {
+        "day": 12,
+        "q": "Quel est le seuil de présence accidentelle d'OGM autorisés au-delà duquel l'étiquetage 'Contient des OGM' devient obligatoire (Règlement 1829/2003) ?",
+        "o": [
+            "0,1 %",
+            "0,5 %",
+            "0,9 %",
+            "1,0 %"
+        ],
+        "a": 2,
+        "exp": "L'étiquetage n'est pas requis si la présence est accidentelle ou techniquement inévitable et inférieure à 0,9 % des ingrédients considérés.",
+        "f": "France pesticide.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1bGTswV-6iiuOgen2cJcPZbWXfHk1ODt3"
+    },
+    {
+        "day": 13,
+        "q": "Dans le cadre du nettoyage industriel (Cercle de Sinner), quels sont les 4 facteurs interdépendants ?",
+        "o": [
+            "Temps, Température, Action Chimique, Action Mécanique",
+            "Prix, Qualité, Sécurité, Environnement",
+            "Eau, Air, Surface, Détergent",
+            "pH, Conductivité, Densité, Viscosité"
+        ],
+        "a": 0,
+        "exp": "Le cercle de Sinner stipule que la diminution d'un facteur (ex: température) doit être compensée par l'augmentation d'un autre (ex: temps ou concentration chimique).",
+        "f": "tuyaux.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1ABKlRVC8wc2Ej9naPOJCSmRbUCobek-L"
+    },
+    {
+        "day": 14,
+        "q": "Selon le Règlement (CE) n° 1924/2006, une allégation nutritionnelle 'Source de fibres' nécessite une teneur minimale de :",
+        "o": [
+            "1,5 g de fibres pour 100 g",
+            "3 g de fibres pour 100 g",
+            "6 g de fibres pour 100 g",
+            "10 g de fibres pour 100 g"
+        ],
+        "a": 1,
+        "exp": "L'allégation 'Source de fibres' n'est possible que si le produit contient au moins 3 g de fibres par 100 g (ou 1,5 g par 100 kcal).",
+        "f": "allegationsanté.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1Z10ap-QPtITxEzTgflbLXLk-rDbX6end"
+    },
+    {
+        "day": 15,
+        "q": "Quel règlement impose aux entreprises du secteur alimentaire d'appliquer des mesures d'atténuation pour réduire la présence d'acrylamide ?",
+        "o": [
+            "Règlement (UE) 2017/2158",
+            "Règlement (CE) 178/2002",
+            "Règlement (CE) 852/2004",
+            "Directive 2002/46/CE"
+        ],
+        "a": 0,
+        "exp": "Ce règlement établit des mesures d'atténuation et des teneurs de référence pour réduire l'acrylamide dans les frites, le pain, le café, etc.",
+        "f": "oxydetitane.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=11OtLzDKqJORKB4NnWs3P6r2upjQei7L-"
+    },
+    {
+        "day": 16,
+        "q": "Selon le Règlement (CE) n° 396/2005, qu'est-ce qu'une LMR ?",
+        "o": [
+            "Limite Minimale Requise pour les nutriments",
+            "Limite Maximale de Résidus de pesticides autorisée",
+            "Limite Moyenne de Réfrigération",
+            "Liste des Matériaux Recyclables"
+        ],
+        "a": 1,
+        "exp": "La LMR est la concentration maximale de résidus de pesticides autorisée dans ou sur les denrées alimentaires.",
+        "f": "IFStrendrisk.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=178g4ItFZBMS4mJlJTs4jPjtewy9Vds3H"
+    },
+    {
+        "day": 17,
+        "q": "Quel est le principe de la 'Migration Globale' pour les emballages plastiques selon le Règlement (UE) 10/2011 ?",
+        "o": [
+            "La migration spécifique du Bisphénol A",
+            "La quantité totale de substances non-volatiles migrant du matériau vers l'aliment",
+            "Le passage de l'encre à travers le carton",
+            "Le recyclage du plastique"
+        ],
+        "a": 1,
+        "exp": "La limite de migration globale (généralement 10 mg/dm²) mesure l'inertie globale du matériau, sans identifier les substances spécifiques.",
+        "f": "foodfraudvisipilot.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1mZft6XU0PtmIuPhvj9szGf79-9lf7o7d"
+    },
+    {
+        "day": 18,
+        "q": "Selon le Règlement (CE) n° 178/2002 (Article 19), quelle est la première action obligatoire si un exploitant considère qu'une denrée importée n'est pas sûre ?",
+        "o": [
+            "Détruire le lot discrètement",
+            "Attendre les plaintes clients",
+            "Engager immédiatement les procédures de retrait et informer les autorités compétentes",
+            "Vendre le produit en promotion"
+        ],
+        "a": 2,
+        "exp": "L'article 19 impose le retrait immédiat (et le rappel si le produit a atteint le consommateur) ainsi que la notification officielle aux autorités.",
+        "f": "iso22002-1.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1cDnVzRzg-NmDpZ0zoqEVYREOT17IBCm7"
+    },
+    {
+        "day": 19,
+        "q": "Selon le Règlement (UE) 2018/848, l'utilisation d'OGM est-elle autorisée en production biologique ?",
+        "o": [
+            "Oui, sans restriction",
+            "Oui, si c'est pour l'alimentation animale",
+            "Non, l'utilisation d'OGM et de produits dérivés d'OGM est interdite",
+            "Oui, si < 5%"
+        ],
+        "a": 2,
+        "exp": "L'interdiction des OGM est un principe fondamental de la production biologique (avec une tolérance uniquement pour la présence accidentelle < 0,9%).",
+        "f": "ISO22002027.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1Z8oozvJgsRLCzVqBYfQWz7GliUCzb66D"
+    },
+    {
+        "day": 20,
+        "q": "Selon le Règlement 852/2004, l'analyse des dangers HACCP doit prendre en compte quels types de dangers ?",
+        "o": [
+            "Uniquement microbiologiques",
+            "Biologiques, Chimiques et Physiques",
+            "Uniquement les allergènes",
+            "Uniquement les corps étrangers"
+        ],
+        "a": 1,
+        "exp": "Le plan HACCP doit identifier, évaluer et maîtriser les dangers significatifs au regard de la sécurité des aliments : biologiques, chimiques (dont allergènes) et physiques.",
+        "f": "detecteurmetaux.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1xQQsHcwyuXe76N-NpkMrvukiQQE9V0zz"
+    },
+    {
+        "day": 21,
+        "q": "En atmosphère modifiée (MAP), quel gaz est principalement utilisé pour ses propriétés bactériostatiques (inhibe la croissance) ?",
+        "o": [
+            "Azote (N2)",
+            "Oxygène (O2)",
+            "Dioxyde de carbone (CO2)",
+            "Hélium (He)"
+        ],
+        "a": 2,
+        "exp": "Le CO2 est le gaz actif principal en MAP car il se dissout dans la phase aqueuse et grasse, abaissant le pH et inhibant la croissance microbienne.",
+        "f": "Azotegenerateur.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1YPj6GDWhTPCBvReBXmJZbxUSMRiBC5Lo"
+    },
+    {
+        "day": 22,
+        "q": "Quelle est la définition d'un 'Nouvel Aliment' (Novel Food) selon le Règlement (UE) 2015/2283 ?",
+        "o": [
+            "Un aliment riche en vitamines",
+            "Un aliment dont la consommation humaine était négligeable dans l'Union avant le 15 mai 1997",
+            "Un aliment contenant des additifs",
+            "Un aliment produit en laboratoire uniquement"
+        ],
+        "a": 1,
+        "exp": "La date pivot est le 15 mai 1997. Tout aliment non consommé significativement avant cette date nécessite une autorisation avant mise sur le marché.",
+        "f": "ravageur boulangerie.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=17wJgepcdg_LZG81l4fjkEfqxRdW6KVpq"
+    },
+    {
+        "day": 23,
+        "q": "Selon le Règlement (CE) n° 1333/2008, qu'est-ce qu'un additif alimentaire ?",
+        "o": [
+            "Un ingrédient agricole normal",
+            "Une substance non consommée comme aliment en soi, ajoutée intentionnellement pour un but technologique",
+            "Un contaminant environnemental",
+            "Une aide technologique éliminée en fin de process"
+        ],
+        "a": 1,
+        "exp": "L'additif est ajouté intentionnellement pour des raisons technologiques (conservation, coloration, texture) et se retrouve dans le produit fini.",
+        "f": "nutriscore.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1cQhaliuP3vtysRedSVlwTK1r22hlqOQG"
+    },
+    {
+        "day": 24,
+        "q": "Quelle norme ISO définit les exigences relatives aux systèmes de management de la sécurité des denrées alimentaires ?",
+        "o": [
+            "ISO 9001",
+            "ISO 14001",
+            "ISO 22000",
+            "ISO 45001"
+        ],
+        "a": 2,
+        "exp": "L'ISO 22000 est la norme internationale spécifique au management de la sécurité des denrées alimentaires, intégrant l'HACCP.",
+        "f": "aircomprimé.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=13fM84mzhhpxkok5qHj64SJB6BFFvkxdk"
+    },
+    {
+        "day": 25,
+        "q": "Selon le Règlement (UE) n° 10/2011, quel est le symbole utilisé pour indiquer qu'un matériau est apte au contact alimentaire ?",
+        "o": [
+            "Un triangle de recyclage",
+            "Un verre et une fourchette",
+            "Une poubelle barrée",
+            "Une tête de mort"
+        ],
+        "a": 1,
+        "exp": "Le symbole 'verre et fourchette' indique que le matériau est destiné à entrer en contact avec des denrées alimentaires.",
+        "f": "Listeria2026.pdf",
+        "l": "https://drive.google.com/uc?export=download&id=1LM00Eg7Z2YVgRg7hOSFU6f4tJaBG2XRa"
+    }
+];

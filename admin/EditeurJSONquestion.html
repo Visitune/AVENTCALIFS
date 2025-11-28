@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Quiz IFS/Exam</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Header */
+        header { background: var(--card); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h1 { margin: 0; font-size: 1.25rem; color: var(--primary); }
+        .header-actions { display: flex; gap: 10px; }
+
+        /* Buttons */
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        
+        /* Main Layout */
+        main { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar (List) */
+        .sidebar { width: 400px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .search-box { padding: 1rem; border-bottom: 1px solid var(--border); background: #f9fafb; }
+        .search-box input, .search-box select { width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
+        .question-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+        .question-item { padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .question-item:hover { background: #eff6ff; }
+        .question-item.active { background: #dbeafe; border-left: 4px solid var(--primary); }
+        .q-meta { font-size: 0.75rem; color: #6b7280; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .q-text { font-size: 0.9rem; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Editor Area */
+        .editor { flex: 1; padding: 2rem; overflow-y: auto; display: none; }
+        .editor.visible { display: block; }
+        .editor-container { max-width: 800px; margin: 0 auto; background: var(--card); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* Forms */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; box-sizing: border-box; }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        
+        .row { display: flex; gap: 1rem; }
+        .col { flex: 1; }
+
+        /* Options Editor */
+        .options-list { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .option-item { display: flex; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border); background: #fafafa; }
+        .option-item:last-child { border-bottom: none; }
+        .option-radio { margin-right: 10px; }
+        .option-input { flex: 1; border: 1px solid transparent; background: transparent; padding: 4px; }
+        .option-input:focus { border-color: var(--primary); background: white; outline: none; }
+        .option-remove { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 10px; }
+        
+        /* Stats Bar */
+        .stats-bar { background: #1f2937; color: white; padding: 0.5rem 2rem; font-size: 0.8rem; display: flex; justify-content: space-between; }
+
+        /* Empty State */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #6b7280; }
+        
+        /* Metadata Editor */
+        .metadata-panel { background: #fffbeb; border: 1px solid #fcd34d; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .tab { cursor: pointer; padding: 0.5rem 1rem; border-radius: 4px; }
+        .tab.active { background: var(--primary); color: white; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>✏️ Éditeur JSON IFS</h1>
+        <div class="header-actions">
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📂 Charger JSON</button>
+            <button class="btn btn-primary" onclick="exportData()">💾 Sauvegarder JSON</button>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <span id="file-info">Aucun fichier chargé</span>
+        <span id="stats-info"></span>
+    </div>
+
+    <main id="app-content" style="display:none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="🔍 Rechercher (ID ou texte)...">
+                <select id="categoryFilter">
+                    <option value="">Toutes les catégories</option>
+                </select>
+                <button class="btn btn-success" style="width: 100%; margin-top: 5px;" onclick="createNewQuestion()">+ Nouvelle Question</button>
+            </div>
+            <ul class="question-list" id="questionList">
+                <!-- Items injected via JS -->
+            </ul>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor visible">
+            <div class="editor-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('question')" id="tab-question">Question</div>
+                    <div class="tab" onclick="switchTab('metadata')" id="tab-metadata">Métadonnées Fichier</div>
+                </div>
+
+                <!-- Metadata View -->
+                <div id="view-metadata" style="display: none;">
+                    <h2>Métadonnées du Quiz</h2>
+                    <div class="form-group">
+                        <label>Titre du Quiz</label>
+                        <input type="text" class="form-control" id="meta-title">
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <label>Version</label>
+                            <input type="text" class="form-control" id="meta-version">
+                        </div>
+                        <div class="form-group col">
+                            <label>Score de passage</label>
+                            <input type="number" class="form-control" id="meta-score">
+                        </div>
+                        <div class="form-group col">
+                            <label>Temps limite (min)</label>
+                            <input type="number" class="form-control" id="meta-time">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Catégories (liste)</label>
+                        <textarea class="form-control" id="meta-categories" style="height: 150px; font-family: monospace;"></textarea>
+                        <small style="color: grey;">Une catégorie par ligne ou séparées par des virgules.</small>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveMetadata()">Enregistrer Métadonnées</button>
+                </div>
+
+                <!-- Question View -->
+                <div id="view-question">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="margin:0">Édition Question</h2>
+                        <div>
+                            <button class="btn btn-outline" onclick="duplicateQuestion()">Dupliquer</button>
+                            <button class="btn btn-danger" onclick="deleteQuestion()">Supprimer</button>
+                        </div>
+                    </div>
+
+                    <form id="qForm" onsubmit="event.preventDefault(); saveCurrentQuestion();">
+                        <div class="row">
+                            <div class="form-group col" style="flex: 0 0 150px;">
+                                <label>ID</label>
+                                <input type="text" class="form-control" id="q-id">
+                            </div>
+                            <div class="form-group col">
+                                <label>Catégorie</label>
+                                <input type="text" class="form-control" id="q-category" list="cat-suggestions">
+                                <datalist id="cat-suggestions"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Question</label>
+                            <textarea class="form-control" id="q-text"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Réponses (Cochez la bonne réponse)</label>
+                            <div class="options-list" id="options-container">
+                                <!-- Options injected via JS -->
+                            </div>
+                            <button type="button" class="btn btn-outline" style="margin-top: 10px; width: 100%;" onclick="addOption()">+ Ajouter une option</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Explication</label>
+                            <textarea class="form-control" id="q-explanation"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col">
+                                <label>Référence / Règlement</label>
+                                <input type="text" class="form-control" id="q-regulation">
+                            </div>
+                            <div class="form-group col">
+                                <label>Source (facultatif)</label>
+                                <input type="text" class="form-control" id="q-source">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="empty-state" id="empty-state">
+        <div style="text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
+            <h2>Aucun fichier chargé</h2>
+            <p>Chargez le fichier <code>ifs-questions-final-avec-examen.json</code> pour commencer.</p>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Charger un fichier</button>
+        </div>
+    </div>
+
+    <script>
+        let quizData = { metadata: {}, questions: [] };
+        let currentQuestionIndex = -1;
+        let filteredQuestions = [];
+
+        // --- Init & File Handling ---
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    quizData = JSON.parse(event.target.result);
+                    initApp();
+                } catch (error) {
+                    alert("Erreur lors de la lecture du JSON : " + error.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function initApp() {
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('app-content').style.display = 'flex';
+            document.getElementById('file-info').textContent = `Fichier chargé | ${quizData.metadata.version || 'v1.0'}`;
+            
+            // Populate filters
+            updateStats();
+            renderCategories();
+            filterQuestions(); // Initial render
+            
+            // Load Metadata
+            loadMetadataToForm();
+        }
+
+        function updateStats() {
+            const count = quizData.questions.length;
+            document.getElementById('stats-info').textContent = `${count} questions au total`;
+            quizData.metadata.totalQuestions = count; // Ensure sync
+        }
+
+        // --- List & Filtering ---
+        const searchInput = document.getElementById('search');
+        const categoryFilter = document.getElementById('categoryFilter');
+
+        searchInput.addEventListener('input', filterQuestions);
+        categoryFilter.addEventListener('change', filterQuestions);
+
+        function renderCategories() {
+            const categories = new Set(quizData.questions.map(q => q.category));
+            const dl = document.getElementById('cat-suggestions');
+            const select = document.getElementById('categoryFilter');
+            
+            dl.innerHTML = '';
+            select.innerHTML = '<option value="">Toutes les catégories</option>';
+
+            Array.from(categories).sort().forEach(cat => {
+                // For Datalist (Input suggestion)
+                const opt = document.createElement('option');
+                opt.value = cat;
+                dl.appendChild(opt);
+
+                // For Filter
+                const selOpt = document.createElement('option');
+                selOpt.value = cat;
+                selOpt.textContent = cat;
+                select.appendChild(selOpt);
+            });
+        }
+
+        function filterQuestions() {
+            const search = searchInput.value.toLowerCase();
+            const cat = categoryFilter.value;
+
+            filteredQuestions = quizData.questions.map((q, index) => ({...q, originalIndex: index}))
+                .filter(q => {
+                    const matchSearch = String(q.id).toLowerCase().includes(search) || 
+                                      q.question.toLowerCase().includes(search);
+                    const matchCat = cat === "" || q.category === cat;
+                    return matchSearch && matchCat;
+                });
+
+            renderList();
+        }
+
+        function renderList() {
+            const list = document.getElementById('questionList');
+            list.innerHTML = '';
+
+            // Optimisation: limit rendering if too many items (simple pagination logic could go here)
+            const displayLimit = 100; 
+            
+            filteredQuestions.slice(0, displayLimit).forEach((q) => {
+                const li = document.createElement('li');
+                li.className = `question-item ${q.originalIndex === currentQuestionIndex ? 'active' : ''}`;
+                li.onclick = () => loadQuestion(q.originalIndex);
+                li.innerHTML = `
+                    <div class="q-meta">
+                        <span style="font-weight:bold; color:var(--primary)">${q.id}</span>
+                        <span>${q.category}</span>
+                    </div>
+                    <div class="q-text">${q.question}</div>
+                `;
+                list.appendChild(li);
+            });
+
+            if (filteredQuestions.length > displayLimit) {
+                const more = document.createElement('div');
+                more.style.padding = "10px";
+                more.style.textAlign = "center";
+                more.style.color = "grey";
+                more.textContent = `... et ${filteredQuestions.length - displayLimit} autres résultats. Affinez la recherche.`;
+                list.appendChild(more);
+            }
+        }
+
+        // --- Editing Logic ---
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            document.getElementById('view-question').style.display = tab === 'question' ? 'block' : 'none';
+            document.getElementById('view-metadata').style.display = tab === 'metadata' ? 'block' : 'none';
+        }
+
+        function loadMetadataToForm() {
+            const m = quizData.metadata;
+            document.getElementById('meta-title').value = m.title || '';
+            document.getElementById('meta-version').value = m.version || '';
+            document.getElementById('meta-score').value = m.passingScore || '';
+            document.getElementById('meta-time').value = m.timeLimit || '';
+            
+            let cats = m.categories || [];
+            if(Array.isArray(cats)) cats = cats.join('\n');
+            document.getElementById('meta-categories').value = cats;
+        }
+
+        function saveMetadata() {
+            quizData.metadata.title = document.getElementById('meta-title').value;
+            quizData.metadata.version = document.getElementById('meta-version').value;
+            quizData.metadata.passingScore = parseInt(document.getElementById('meta-score').value);
+            quizData.metadata.timeLimit = parseInt(document.getElementById('meta-time').value);
+            
+            const catsRaw = document.getElementById('meta-categories').value;
+            quizData.metadata.categories = catsRaw.split(/[\n,]/).map(c => c.trim()).filter(c => c !== "");
+            
+            alert('Métadonnées sauvegardées en mémoire.');
+        }
+
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const q = quizData.questions[index];
+            
+            // Highlight in list
+            document.querySelectorAll('.question-item').forEach(el => el.classList.remove('active'));
+            // Re-render list to show active state properly would be cleaner but heavier. We rely on CSS.
+            renderList(); 
+
+            // Fill Form
+            document.getElementById('q-id').value = q.id;
+            document.getElementById('q-category').value = q.category;
+            document.getElementById('q-text').value = q.question;
+            document.getElementById('q-explanation').value = q.explanation || '';
+            
+            // Handle different fields for reference
+            document.getElementById('q-regulation').value = q.regulation || q.reference?.section || '';
+            document.getElementById('q-source').value = q.reference?.source || '';
+
+            // Handle Options (Complex logic due to mixed JSON formats)
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            let optionsArray = [];
+            let correctIndex = -1;
+
+            // Detection Logic
+            if (q.answers) {
+                // Exam Format: [{text: "A", correct: true}, ...]
+                optionsArray = q.answers.map(a => a.text);
+                correctIndex = q.answers.findIndex(a => a.correct === true);
+            } else if (q.options) {
+                // Standard Format: ["A", "B"] with correctAnswer index
+                optionsArray = q.options;
+                correctIndex = q.correctAnswer;
+            }
+
+            optionsArray.forEach((optText, i) => {
+                addOptionDOM(optText, i === correctIndex);
+            });
+            
+            switchTab('question');
+        }
+
+        function addOptionDOM(text = '', isCorrect = false) {
+            const container = document.getElementById('options-container');
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerHTML = `
+                <input type="radio" name="correctOption" class="option-radio" ${isCorrect ? 'checked' : ''}>
+                <input type="text" class="option-input" value="${text.replace(/"/g, '&quot;')}" placeholder="Texte de la réponse">
+                <button type="button" class="option-remove" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addOption() {
+            addOptionDOM('', false);
+        }
+
+        function saveCurrentQuestion() {
+            if (currentQuestionIndex === -1) return;
+
+            // Collect Data
+            const id = document.getElementById('q-id').value;
+            const category = document.getElementById('q-category').value;
+            const text = document.getElementById('q-text').value;
+            const explanation = document.getElementById('q-explanation').value;
+            const regulation = document.getElementById('q-regulation').value;
+            const source = document.getElementById('q-source').value;
+
+            // Collect Options
+            const optionDivs = document.querySelectorAll('.option-item');
+            const options = [];
+            let correctIdx = 0;
+            
+            optionDivs.forEach((div, idx) => {
+                const val = div.querySelector('.option-input').value;
+                const isChecked = div.querySelector('.option-radio').checked;
+                options.push(val);
+                if (isChecked) correctIdx = idx;
+            });
+
+            // Determine target format based on what was there before OR default to standard
+            // Note: The provided file uses 'options' + 'correctAnswer' for ID numbers, and 'answers' objects for ID strings like "HHCH-..."
+            // We will try to preserve the structure based on the ID format.
+            
+            const oldQ = quizData.questions[currentQuestionIndex];
+            let newQ = {
+                id: isNaN(id) ? id : parseInt(id), // Try to keep number if number
+                category,
+                question: text,
+                explanation
+            };
+
+            // Logic to choose format: If ID is number -> Standard, Else -> Exam/Complex
+            const isComplexFormat = oldQ.answers !== undefined || (typeof id === 'string' && id.includes('-'));
+
+            if (isComplexFormat) {
+                // Save as object array {text, correct}
+                newQ.answers = options.map((opt, i) => ({
+                    text: opt,
+                    correct: i === correctIdx
+                }));
+                // Handle complex reference object if needed
+                if (source) {
+                    newQ.reference = { source, section: regulation };
+                } else {
+                    newQ.regulation = regulation;
+                }
+            } else {
+                // Save as simple array + index
+                newQ.options = options;
+                newQ.correctAnswer = correctIdx;
+                newQ.regulation = regulation;
+            }
+
+            // Update Data
+            quizData.questions[currentQuestionIndex] = newQ;
+            
+            // Refresh
+            filterQuestions(); // Re-filters and re-renders list
+            alert('Question sauvegardée !');
+        }
+
+        function createNewQuestion() {
+            const newQ = {
+                id: quizData.questions.length + 1,
+                category: "Général",
+                question: "Nouvelle question...",
+                options: ["Choix 1", "Choix 2"],
+                correctAnswer: 0,
+                explanation: "",
+                regulation: ""
+            };
+            quizData.questions.unshift(newQ); // Add to top
+            updateStats();
+            filterQuestions();
+            loadQuestion(0); // Load the new question (index 0 because unshifted)
+        }
+
+        function duplicateQuestion() {
+            if (currentQuestionIndex === -1) return;
+            const current = quizData.questions[currentQuestionIndex];
+            const copy = JSON.parse(JSON.stringify(current));
+            
+            // Try to generate unique ID
+            if (typeof copy.id === 'number') {
+                copy.id = Math.max(...quizData.questions.map(q => Number(q.id) || 0)) + 1;
+            } else {
+                copy.id = copy.id + "-COPY";
+            }
+            
+            quizData.questions.unshift(copy);
+            updateStats();
+            filterQuestions();
+            loadQuestion(0);
+        }
+
+        function deleteQuestion() {
+            if (currentQuestionIndex === -1) return;
+            if(!confirm("Êtes-vous sûr de vouloir supprimer cette question ?")) return;
+
+            quizData.questions.splice(currentQuestionIndex, 1);
+            updateStats();
+            filterQuestions();
+            document.getElementById('view-question').style.display = 'none'; // Hide editor
+            currentQuestionIndex = -1;
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quizData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ifs-questions-edited.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+    </script>
+</body>
+</html>
