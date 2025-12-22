@@ -1,780 +1,590 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendrier de l'Avent - Food Safety</title>
-    <!-- Polices Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>BRCGS Validator | Full Width</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-red: #d42426;
-            --primary-green: #165b33;
-            --gold: #f8b229;
-            --dark-bg: #0b0c10;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            
-            /* --- URLS DES IMAGES DES CASES (Vous pouvez les changer ici) --- */
-            /* J'ai mis des images libres de droits pour l'exemple */
-            --img-bauble: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/boule.png');
-            --img-gift: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/couronne.png'); 
-            --img-flake: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/snowflake.png');
+            --bg-body: #F3F4F6;
+            --bg-card: #FFFFFF;
+            --primary-green: #43A047;
+            --primary-hover: #2E7D32;
+            --score-blue: #3B82F6;
+            --score-track: #E5E7EB;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --crit-bg: #FEF2F2;
+            --crit-border: #EF4444;
+            --warn-bg: #FFFBEB;
+            --warn-border: #F59E0B;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* LOADER */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark-bg); z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3);
-            border-top-color: var(--gold); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { to {transform: rotate(360deg);} }
+        * { box-sizing: border-box; outline: none; }
 
         body {
-            margin: 0; padding: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--dark-bg);
-            /* Image par défaut (chargement) */
-            background-image: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/chad-madden-SUTfFCAHV_A-unsplash.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center;
-            transition: background-image 1s ease-in-out;
+            /* Changement 1: On autorise le scroll de page */
+            overflow-y: auto; 
         }
 
-        body::before {
-            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); z-index: -1; pointer-events: none;
-        }
-
-        #snowCanvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
-        }
-
-        .main-container {
-            width: 100%; max-width: 1200px; padding: 2rem;
-            z-index: 1; flex-grow: 1;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
+        /* --- HEADER --- */
         header {
-            text-align: center; padding: 2rem 1rem; width: 100%;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: var(--bg-card);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid #E5E7EB;
+            position: sticky; /* Le header reste en haut */
+            top: 0;
+            z-index: 50;
         }
 
-        header h1 {
-            font-family: 'Mountains of Christmas', cursive;
-            font-size: 3.5rem; margin: 0; color: var(--gold);
-        }
+        .brand { font-weight: 700; font-size: 1.3rem; color: #111827; }
+        .toolbar { display: flex; gap: 10px; }
 
-        /* PROGRESS BAR */
-        .progress-wrap {
-            width: 300px; height: 10px; background: rgba(255,255,255,0.2);
-            border-radius: 5px; margin: 15px auto; overflow: hidden;
+        .btn-small {
+            background: white;
+            border: 1px solid #D1D5DB;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .progress-fill {
-            height: 100%; background: var(--gold); width: 0%; transition: width 1s;
-        }
-        .progress-txt { font-size: 0.9rem; margin-top: 5px; color: #ddd; }
+        .btn-small:hover { border-color: var(--text-main); color: var(--text-main); background: #F9FAFB; }
 
-        /* GRILLE */
-        .calendar-grid {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 40px; width: 100%; margin-top: 30px; padding-bottom: 50px;
-        }
-
-        /* --- NOUVEAU STYLE DES BOITES (IMAGES) --- */
-        .day-box {
-            width: 140px; height: 140px;
-            /* Plus de fond coloré CSS, place à l'image */
-            background-color: transparent; 
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: transform 0.3s;
-            position: relative; flex-shrink: 0;
-            
-            /* Ombre portée naturelle pour les PNG transparents */
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
-        }
-
-        .day-box:hover:not(.locked) {
-            transform: translateY(-10px) scale(1.1) !important;
-            filter: drop-shadow(0 15px 25px rgba(248, 178, 41, 0.6)); /* Glow doré au survol */
-            z-index: 10;
-        }
-
-        .day-number {
-            font-family: 'Mountains of Christmas', cursive;
-            font-size: 3rem; font-weight: bold; color: #fff;
-            text-shadow: 0 0 5px black, 0 0 10px black; /* Ombre forte pour lisibilité sur l'image */
-            z-index: 5; pointer-events: none;
-            margin-top: 10px; /* Petit ajustement pour centrer visuellement */
-        }
-
-        /* Application des Images définies dans :root */
-        .day-box.shape-ball { background-image: var(--img-bauble); }
-        .day-box.shape-gift { background-image: var(--img-gift); }
-        .day-box.shape-snowflake { background-image: var(--img-flake); }
-
-        /* ETATS */
-        .locked { 
-            filter: grayscale(1) brightness(0.5); 
-            opacity: 0.7; cursor: not-allowed; 
-        }
-        .locked .day-number::after { content: '🔒'; display: block; font-size: 1rem; text-align: center; }
-        
-        .past { filter: brightness(0.8) sepia(0.3); opacity: 0.9; }
-        .past::after { 
-            content: '✔'; position: absolute; bottom: 0px; right: 0px; 
-            font-size: 2rem; color: #2ecc71; z-index: 20; 
-            text-shadow: 2px 2px 0 #000; font-weight:bold;
-        }
-
-        .today { animation: float 3s ease-in-out infinite; z-index: 20; transform: scale(1.1); }
-        @keyframes float { 
-            0%, 100% { transform: translateY(0) scale(1.1); }
-            50% { transform: translateY(-10px) scale(1.1); }
-        }
-
-        /* MODALE */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        .modal.visible { opacity: 1; pointer-events: auto; }
-
-        .modal-content {
-            background: white; color: #333; padding: 2.5rem;
-            border-radius: 15px; width: 90%; max-width: 600px;
-            position: relative; border-top: 10px solid var(--primary-red);
-            box-shadow: 0 20px 60px black; text-align: left;
-        }
-
-        .close-btn { position: absolute; top: 10px; right: 20px; font-size: 2.5rem; cursor: pointer; color: #aaa; }
-        .question-text { font-size: 1.3rem; font-weight: bold; margin-bottom: 1.5rem; line-height: 1.4; border-left: 5px solid var(--gold); padding-left: 15px; }
-
-        .option-btn {
-            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
-            border: 2px solid #ddd; border-radius: 8px; background: white;
-            cursor: pointer; font-size: 1rem; text-align: left; transition: 0.2s;
-        }
-        .option-btn:hover { background: #f8f8f8; border-color: var(--gold); transform: translateX(5px); }
-        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; font-weight: bold; }
-        .option-btn.incorrect { background: #f8d7da; border-color: #dc3545; color: #721c24; }
-
-        .feedback-zone { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
-        .download-btn {
-            display: inline-block; margin-top: 10px; padding: 12px 30px;
-            background: linear-gradient(to right, var(--primary-red), #b01c1e);
-            color: white; text-decoration: none; border-radius: 50px;
-            font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-        .download-btn:hover { transform: scale(1.05); }
-
-        /* FOOTER & LOGO VISIPILOT */
-        footer { 
-            padding: 40px 20px; 
-            text-align: center; 
+        /* --- MAIN LAYOUT --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
             width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            margin-top: auto; /* Pousse le footer en bas */
-        }
-        
-        .logo-link img {
-            height: 70px; /* Taille du logo */
-            width: auto;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: transform 0.3s, box-shadow 0.3s;
-            background: white; /* Fond blanc propre pour le logo */
-            padding: 5px;
-        }
-        .logo-link:hover img {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255,255,255,0.4);
-        }
-        .copyright {
-            margin-top: 15px; font-size: 0.8rem; color: #aaa;
         }
 
+        /* EDITOR SECTION */
+        .editor-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            /* Changement 2: Hauteur auto pour s'adapter au contenu */
+            height: auto; 
+        }
+
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .input-wrapper {
+            position: relative;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            min-height: 200px; /* Hauteur minimale confortable */
+            background: white;
+            transition: border-color 0.2s;
+        }
+        
+        .input-wrapper:focus-within { border-color: var(--primary-green); }
+
+        textarea, #viewMode {
+            width: 100%;
+            min-height: 200px; /* S'assure que la zone est assez grande */
+            border: none;
+            padding: 20px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical; /* Permet à l'utilisateur d'agrandir */
+            background: transparent;
+            color: var(--text-main);
+            display: block;
+        }
+
+        /* HIGHLIGHTING */
+        .mark { cursor: pointer; border-radius: 3px; padding: 2px 0; border-bottom: 2px solid; transition: background 0.2s; }
+        .mark.crit { background-color: var(--crit-bg); border-color: var(--crit-border); color: #991B1B; }
+        .mark.warn { background-color: var(--warn-bg); border-color: var(--warn-border); color: #92400E; }
+        .mark:hover { filter: brightness(0.95); }
+
+        .btn-analyze {
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 6px;
+            padding: 14px;
+            width: 100%;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-analyze:hover { background-color: var(--primary-hover); }
+
+        /* RESULTS SECTION - GRID LAYOUT */
+        .results-wrapper {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start; /* Important: aligne en haut */
+        }
+
+        /* SCORE CARD - STICKY */
+        .score-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 320px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            
+            /* Changement 3: Sticky Position */
+            position: sticky;
+            top: 100px; /* Reste visible quand on scroll */
+        }
+
+        .score-circle {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+        
+        .score-circle svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .circle-bg { stroke: var(--score-track); }
+        .circle-bar { stroke: var(--score-blue); transition: stroke-dashoffset 1s ease-out; }
+        
+        .score-number {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        
+        .score-label {
+            margin-top: 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* ISSUES PANEL - FLUID WIDTH */
+        .issues-panel {
+            flex: 1; /* Prend tout l'espace restant */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            /* Changement 4: Plus de scroll interne */
+        }
+
+        .panel-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .issue-item {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            border-left: 5px solid #ccc;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .issue-item.crit { border-left-color: var(--crit-border); background: #FEF2F2; }
+        .issue-item.warn { border-left-color: var(--warn-border); background: #FFFBEB; }
+        .issue-item.good { border-left-color: #10B981; background: #ECFDF5; }
+
+        .issue-title { font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .issue-title.crit { color: #991B1B; }
+        .issue-title.warn { color: #92400E; }
+
+        .issue-desc { font-size: 0.95rem; color: #374151; line-height: 1.6; }
+        .suggestion { 
+            margin-top: 12px; 
+            padding-top: 12px; 
+            border-top: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.9rem; 
+            font-style: italic; 
+            color: #555; 
+            display: flex; 
+            gap: 8px; 
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .results-wrapper {
+                flex-direction: column; /* Stack vertically on tablet */
+            }
+            .score-card {
+                width: 100%; /* Full width score */
+                position: static; /* No sticky on mobile */
+                flex-direction: row; /* Horizontal layout for score card */
+                justify-content: space-between;
+                padding: 20px;
+                gap: 20px;
+            }
+            .score-circle { width: 80px; height: 80px; }
+            .score-number { font-size: 1.5rem; }
+        }
+        
+        @media (max-width: 600px) {
+            .score-card { flex-direction: column; text-align: center; }
+            header { padding: 0 1rem; }
+            .brand { font-size: 1rem; }
+            .btn-small span { display: none; } /* Hide text on small buttons */
+        }
+
+        .hidden { display: none !important; }
+        
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <div style="color:var(--gold); font-family:'Montserrat';">Chargement...</div>
-    </div>
-
-    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-    <audio id="snd-fail" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
-
-    <canvas id="snowCanvas"></canvas>
-
-    <div class="main-container">
-        <header>
-            <h1>Calendrier Food Safety</h1>
-            <p>Challenge Qualité & Sécurité 🎄</p>
-            <div class="progress-wrap">
-                <div class="progress-fill" id="progressBar"></div>
-            </div>
-            <div class="progress-txt">Progression: <span id="progressTxt">0/25</span></div>
-        </header>
-
-        <div class="calendar-grid" id="grid">
-            <!-- JS injectera les cases (images) ici -->
+    <header>
+        <div class="brand">BRCGS Validator</div>
+        <div class="toolbar">
+            <button class="btn-small" onclick="loadDemo()"><span>⚡</span> Load Demo</button>
+            <button class="btn-small" onclick="resetApp()"><span>🔄</span> Reset</button>
+            <button class="btn-small" onclick="copyText()"><span>📋</span> Copy Text</button>
         </div>
+    </header>
 
-        <footer>
-            <!-- LOGO VISIPILOT CLIQUABLE -->
-            <a href="https://visipilot.com" target="_blank" class="logo-link" title="Visitez Visipilot.com">
-                <!-- Lien RAW GitHub pour l'image -->
-                <img src="https://raw.githubusercontent.com/M00N69/BUSCAR/main/logo%2002%20copie.jpg" alt="Logo Visipilot">
-            </a>
-            <div class="copyright">© 2024 - Équipe Food Safety</div>
-        </footer>
-    </div>
-
-    <div class="modal" id="quizModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h3 id="m-day" style="color:var(--primary-green); margin-top:0;">Jour X</h3>
-            <div class="question-text" id="m-question">...</div>
-            <div id="m-options"></div>
+    <main>
+        <!-- EDITOR SECTION -->
+        <section class="editor-card">
+            <div class="card-header">
+                <span>Certification Scope</span>
+                <span style="font-weight:400; font-size:0.9rem; color:var(--text-muted);" id="charCount">0 chars</span>
+            </div>
             
-            <div class="feedback-zone" id="m-feedback">
-                <p id="m-exp" style="margin-bottom:10px;"></p>
-                <a href="#" class="download-btn" id="m-link" target="_blank">🎁 Télécharger la Ressource</a>
+            <div class="input-wrapper">
+                <textarea id="scopeInput" placeholder="Paste your BRCGS Scope text here to begin analysis..."></textarea>
+                <div id="viewMode" class="hidden"></div>
             </div>
+
+            <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyze Scope</button>
+            <button class="btn-small" id="editBtn" onclick="toggleEdit()" style="margin-top:15px; width:100%; display:none; justify-content:center; background:#F3F4F6;">✏️ Edit Text</button>
+        </section>
+
+        <!-- RESULTS SECTION -->
+        <div class="results-wrapper">
+            
+            <!-- SCORE CARD (Sticky Left) -->
+            <div class="score-card">
+                <div style="font-weight:700; margin-bottom:20px; color:var(--text-main);">Conformity Score</div>
+                <div class="score-circle">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="circle-bg" cx="50" cy="50" r="45" fill="none" stroke-width="8"></circle>
+                        <circle class="circle-bar" id="scoreRing" cx="50" cy="50" r="45" fill="none" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+                    </svg>
+                    <div class="score-number" id="scoreVal">--</div>
+                </div>
+                <div class="score-label" id="scoreLabel">Waiting for input</div>
+            </div>
+
+            <!-- ISSUES LIST (Expands Right) -->
+            <div class="issues-panel" id="issuesList">
+                <!-- Placeholder -->
+                <div style="text-align:center; padding: 40px; color:#9CA3AF; background:white; border-radius:12px; border: 2px dashed #E5E7EB;">
+                    <div style="font-size:2.5rem; margin-bottom:15px; opacity:0.5;">🛡️</div>
+                    <div style="font-size:1.1rem; font-weight:600;">Ready to Analyze</div>
+                    <p>Enter your scope text above and click the green button.<br>F931 Compliance checks will appear here.</p>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
 
     <script>
-        // CONFIGURATION
-        const MODE_DEMO = false; 
-
-        // ⚠️ COLLEZ ICI VOTRE JSON GÉNÉRÉ PAR ADMIN.HTML
-        const QUIZ_DATA = [
+        // --- LOGIC ENGINE ---
+        const RULES = [
             {
-                "day": 1,
-                "q": "Selon l'article 18 du Règlement (CE) n° 178/2002, quelle est l'exigence minimale de traçabilité pour les exploitants du secteur alimentaire ?",
-                "o": [
-                    "Traçabilité interne complète incluant les paramètres de cuisson",
-                    "Traçabilité 'un pas en avant, un pas en arrière' (Fournisseur immédiat et Client immédiat)",
-                    "Traçabilité jusqu'au consommateur final individuel",
-                    "Traçabilité uniquement des matières premières importées"
-                ],
-                "a": 1,
-                "exp": "Le règlement impose d'être capable d'identifier toute personne ayant fourni une denrée et toute entreprise à laquelle leurs produits ont été fournis (One step up, one step down).",
-                "f": "Fruits&legumes.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1cImnlyysvEVehhSkt1WzEMrUII44i3Gi"
+                id: 'out_of_scope', severity: 'crit',
+                regex: /\b(marketing|sales|distribution|transport|delivery|growing|procurement|product design|handling|storage)\b/gi,
+                title: "Out-of-Scope Activity",
+                desc: "Terms describing logistics/business functions (Sales, Distribution, Marketing) are forbidden in the audit scope.",
+                tip: "Focus only on manufacturing/packing steps. Remove business functions."
             },
             {
-                "day": 2,
-                "q": "Quelle est la taille minimale des caractères (hauteur de x) pour les mentions obligatoires sur un emballage standard (>80cm²) selon le Règlement INCO 1169/2011 ?",
-                "o": [
-                    "0,9 mm",
-                    "1,2 mm",
-                    "2,0 mm",
-                    "3,0 mm"
-                ],
-                "a": 1,
-                "exp": "Le Règlement (UE) n° 1169/2011 impose une taille de caractères minimale de 1,2 mm pour garantir la lisibilité des informations obligatoires.",
-                "f": "emballageF&L.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=171TtyDW9Mo9P7SGD11BU38ra9DKQCv0s"
+                id: 'claims', severity: 'crit',
+                regex: /\b(organic|halal|kosher|free from|gluten.?free|vegan|vegetarian|non.?gmo|fortified|allergen.?free|without meat)\b/gi,
+                title: "Forbidden Product Claim",
+                desc: "Product claims (provenance, nutritional, religious) must not be in the scope text.",
+                tip: "Describe composition (e.g. 'Rice flour bread'), not certification status (e.g. 'Gluten-free')."
             },
             {
-                "day": 3,
-                "q": "Selon le Règlement (CE) n° 2073/2005, quel est le critère de sécurité pour Listeria monocytogenes dans les produits prêts à consommer permettant sa croissance, avant sortie d'usine ?",
-                "o": [
-                    "Absence dans 25 g",
-                    "100 UFC/g",
-                    "1000 UFC/g",
-                    "Absence dans 10 g"
-                ],
-                "a": 0,
-                "exp": "Si le producteur ne peut pas démontrer que le niveau restera <100 UFC/g jusqu'à la fin de la DLC, l'exigence est l'absence dans 25 g à la sortie de production.",
-                "f": "Lsiteria1.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1yCWKZ6lLnffyNCi-3gS0Dgn6_60ysK1X"
+                id: 'brand', severity: 'crit',
+                regex: /\b(Coca.?Cola|Nestle|Danone|Tesco|Walmart|Mars|Cadbury|Pepsi)\b/gi,
+                title: "Brand Name Detected",
+                desc: "Brand names are strictly forbidden in the scope.",
+                tip: "Use generic product categories (e.g. 'Soft drinks' instead of 'Pepsi')."
             },
             {
-                "day": 4,
-                "q": "Combien de principes fondamentaux composent le système HACCP selon le Codex Alimentarius ?",
-                "o": [
-                    "5 principes",
-                    "7 principes",
-                    "12 principes",
-                    "14 principes"
-                ],
-                "a": 1,
-                "exp": "Le système HACCP repose sur 7 principes (Analyse des dangers, CCP, Limites critiques, Surveillance, Actions correctives, Vérification, Documentation). Les 12 étapes incluent la préparation.",
-                "f": "CODEX.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1XecFfLnrmpVqM-Fq9UfkbwWHRAG8J21s"
+                id: 'traded_fmt', severity: 'crit',
+                regex: /\b(trading|factoring)(?!\s+of)\b/gi,
+                title: "Traded Goods Format",
+                desc: "Incorrect format for traded goods.",
+                tip: "Use exact phrase: 'Trading of [product types]'."
             },
             {
-                "day": 5,
-                "q": "Selon le Règlement (UE) 2017/625 (OCR), sur quoi doit être basée la fréquence des contrôles officiels ?",
-                "o": [
-                    "Uniquement sur la taille de l'entreprise",
-                    "Sur le risque associé aux animaux et denrées, et sur les antécédents de l'opérateur",
-                    "Sur un tirage au sort aléatoire",
-                    "Sur le chiffre d'affaires de l'entreprise"
-                ],
-                "a": 1,
-                "exp": "Les contrôles officiels doivent être réguliers, inopinés et basés sur le risque (type de produit, process, historique de conformité de l'opérateur).",
-                "f": "DGALertepdf",
-                "l": "https://drive.google.com/uc?export=download&id=12xeHAczovwrfhrJsTbMW5ipCpCfVqdVM"
+                id: 'outsourced_fmt', severity: 'crit',
+                regex: /\b(outsourced)\b/gi,
+                custom: (txt, m) => {
+                    const snip = txt.substr(Math.max(0, m.index-15), 50).toLowerCase();
+                    return !snip.includes('including') || !txt.substr(m.index, 50).includes('on');
+                },
+                title: "Outsourced Process Format",
+                desc: "The phrasing for outsourced processes is incorrect.",
+                tip: "Required format: 'including outsourced [process] on [products]'."
             },
             {
-                "day": 6,
-                "q": "Quel règlement cadre définit les principes généraux pour tous les matériaux destinés à entrer en contact avec des denrées alimentaires (MCDA) ?",
-                "o": [
-                    "Règlement (UE) n° 10/2011",
-                    "Règlement (CE) n° 1935/2004",
-                    "Règlement (CE) n° 2023/2006",
-                    "Directive 94/62/CE"
-                ],
-                "a": 1,
-                "exp": "Le Règlement (CE) n° 1935/2004 est le règlement cadre qui pose le principe d'inertie des matériaux (ne pas céder de constituants en quantité dangereuse).",
-                "f": "MCDAtotal.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1W9HydBUTBTpo_Wp91zSa-2qo0xwhp2bE"
+                id: 'headoffice_fmt', severity: 'crit',
+                regex: /\b(head office)\b/gi,
+                custom: (txt, m) => {
+                    const snip = txt.substr(Math.max(0, m.index-20), 60).toLowerCase();
+                    return !snip.includes('incorporating') || !snip.includes('audit at');
+                },
+                title: "Head Office Format",
+                desc: "The phrasing for Head Office audit is incorrect.",
+                tip: "Required format: 'Incorporating head office audit at [address]'."
             },
             {
-                "day": 7,
-                "q": "Quelle est la température maximale autorisée pour le transport des produits surgelés selon la Directive 89/108/CEE ?",
-                "o": [
-                    "-12°C",
-                    "-18°C",
-                    "-24°C",
-                    "-4°C"
-                ],
-                "a": 1,
-                "exp": "La température des aliments surgelés doit être maintenue à -18°C ou moins, avec de brèves fluctuations tolérées de maximum 3°C pendant le transport.",
-                "f": "PFAS.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1jq6qIm0GptUc_-MqcsPYWSaVgZSs2NJ9"
-            },
-            {
-                "day": 8,
-                "q": "Selon le Règlement (UE) 2018/775, quand l'origine de l'ingrédient primaire doit-elle être indiquée ?",
-                "o": [
-                    "Toujours, pour tous les produits",
-                    "Lorsque l'origine du produit fini est indiquée et qu'elle diffère de celle de son ingrédient primaire",
-                    "Uniquement pour les produits carnés",
-                    "Jamais, c'est facultatif"
-                ],
-                "a": 1,
-                "exp": "Si un produit affiche 'Fabriqué en France' mais que son ingrédient principal (ex: lait, viande) vient d'ailleurs, cette origine différente doit être précisée.",
-                "f": "FDArisk.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1VgibfswZdQ9pT9nh0DtH_79UcZTtuFsY"
-            },
-            {
-                "day": 9,
-                "q": "Quel règlement a remplacé le règlement 1881/2006 concernant les teneurs maximales en contaminants (métaux lourds, mycotoxines) ?",
-                "o": [
-                    "Règlement (UE) 2023/915",
-                    "Règlement (CE) 396/2005",
-                    "Règlement (CE) 852/2004",
-                    "Règlement (UE) 2017/2158"
-                ],
-                "a": 0,
-                "exp": "Le Règlement (UE) 2023/915 a abrogé et remplacé le 1881/2006 pour consolider et mettre à jour les limites de contaminants.",
-                "f": "pesticideFrance.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1vat-BFJtB9MgjPAg8xI5uqJNiRb6vNS3"
-            },
-            {
-                "day": 10,
-                "q": "Selon l'Annexe II du Règlement 1169/2011, combien de substances ou produits provoquant des allergies ou intolérances sont à déclaration obligatoire ?",
-                "o": [
-                    "8",
-                    "10",
-                    "12",
-                    "14"
-                ],
-                "a": 3,
-                "exp": "Il existe 14 allergènes majeurs (ex: gluten, crustacés, œufs, poisson, arachides, soja, lait, fruits à coque, céleri, moutarde, sésame, sulfites, lupin, mollusques).",
-                "f": "allergen.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1v4ZLPSUyHRRWxcXqmQB2uHw_Fh3PINvt"
-            },
-            {
-                "day": 11,
-                "q": "Selon le Règlement (CE) n° 853/2004, quelle est la température maximale de conservation des viandes hachées ?",
-                "o": [
-                    "0°C",
-                    "2°C",
-                    "4°C",
-                    "7°C"
-                ],
-                "a": 1,
-                "exp": "Le règlement spécifique aux denrées animales (853/2004) fixe la limite à 2°C pour les viandes hachées et 4°C pour les préparations de viandes.",
-                "f": "crisefromage.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1Do4u2VdzeJn6d_NSh0fLtcQvXd7yUJan"
-            },
-            {
-                "day": 12,
-                "q": "Quel est le seuil de présence accidentelle d'OGM autorisés au-delà duquel l'étiquetage 'Contient des OGM' devient obligatoire (Règlement 1829/2003) ?",
-                "o": [
-                    "0,1 %",
-                    "0,5 %",
-                    "0,9 %",
-                    "1,0 %"
-                ],
-                "a": 2,
-                "exp": "L'étiquetage n'est pas requis si la présence est accidentelle ou techniquement inévitable et inférieure à 0,9 % des ingrédients considérés.",
-                "f": "France pesticide.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1bGTswV-6iiuOgen2cJcPZbWXfHk1ODt3"
-            },
-            {
-                "day": 13,
-                "q": "Dans le cadre du nettoyage industriel (Cercle de Sinner), quels sont les 4 facteurs interdépendants ?",
-                "o": [
-                    "Temps, Température, Action Chimique, Action Mécanique",
-                    "Prix, Qualité, Sécurité, Environnement",
-                    "Eau, Air, Surface, Détergent",
-                    "pH, Conductivité, Densité, Viscosité"
-                ],
-                "a": 0,
-                "exp": "Le cercle de Sinner stipule que la diminution d'un facteur (ex: température) doit être compensée par l'augmentation d'un autre (ex: temps ou concentration chimique).",
-                "f": "tuyaux.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1ABKlRVC8wc2Ej9naPOJCSmRbUCobek-L"
-            },
-            {
-                "day": 14,
-                "q": "Selon le Règlement (CE) n° 1924/2006, une allégation nutritionnelle 'Source de fibres' nécessite une teneur minimale de :",
-                "o": [
-                    "1,5 g de fibres pour 100 g",
-                    "3 g de fibres pour 100 g",
-                    "6 g de fibres pour 100 g",
-                    "10 g de fibres pour 100 g"
-                ],
-                "a": 1,
-                "exp": "L'allégation 'Source de fibres' n'est possible que si le produit contient au moins 3 g de fibres par 100 g (ou 1,5 g par 100 kcal).",
-                "f": "allegationsanté.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1Z10ap-QPtITxEzTgflbLXLk-rDbX6end"
-            },
-            {
-                "day": 15,
-                "q": "Quel règlement impose aux entreprises du secteur alimentaire d'appliquer des mesures d'atténuation pour réduire la présence d'acrylamide ?",
-                "o": [
-                    "Règlement (UE) 2017/2158",
-                    "Règlement (CE) 178/2002",
-                    "Règlement (CE) 852/2004",
-                    "Directive 2002/46/CE"
-                ],
-                "a": 0,
-                "exp": "Ce règlement établit des mesures d'atténuation et des teneurs de référence pour réduire l'acrylamide dans les frites, le pain, le café, etc.",
-                "f": "oxydetitane.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=11OtLzDKqJORKB4NnWs3P6r2upjQei7L-"
-            },
-            {
-                "day": 16,
-                "q": "Selon le Règlement (CE) n° 396/2005, qu'est-ce qu'une LMR ?",
-                "o": [
-                    "Limite Minimale Requise pour les nutriments",
-                    "Limite Maximale de Résidus de pesticides autorisée",
-                    "Limite Moyenne de Réfrigération",
-                    "Liste des Matériaux Recyclables"
-                ],
-                "a": 1,
-                "exp": "La LMR est la concentration maximale de résidus de pesticides autorisée dans ou sur les denrées alimentaires.",
-                "f": "IFStrendrisk.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=178g4ItFZBMS4mJlJTs4jPjtewy9Vds3H"
-            },
-            {
-                "day": 17,
-                "q": "Quel est le principe de la 'Migration Globale' pour les emballages plastiques selon le Règlement (UE) 10/2011 ?",
-                "o": [
-                    "La migration spécifique du Bisphénol A",
-                    "La quantité totale de substances non-volatiles migrant du matériau vers l'aliment",
-                    "Le passage de l'encre à travers le carton",
-                    "Le recyclage du plastique"
-                ],
-                "a": 1,
-                "exp": "La limite de migration globale (généralement 10 mg/dm²) mesure l'inertie globale du matériau, sans identifier les substances spécifiques.",
-                "f": "foodfraudvisipilot.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1mZft6XU0PtmIuPhvj9szGf79-9lf7o7d"
-            },
-            {
-                "day": 18,
-                "q": "Selon le Règlement (CE) n° 178/2002 (Article 19), quelle est la première action obligatoire si un exploitant considère qu'une denrée importée n'est pas sûre ?",
-                "o": [
-                    "Détruire le lot discrètement",
-                    "Attendre les plaintes clients",
-                    "Engager immédiatement les procédures de retrait et informer les autorités compétentes",
-                    "Vendre le produit en promotion"
-                ],
-                "a": 2,
-                "exp": "L'article 19 impose le retrait immédiat (et le rappel si le produit a atteint le consommateur) ainsi que la notification officielle aux autorités.",
-                "f": "iso22002-1.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1cDnVzRzg-NmDpZ0zoqEVYREOT17IBCm7"
-            },
-            {
-                "day": 19,
-                "q": "Selon le Règlement (UE) 2018/848, l'utilisation d'OGM est-elle autorisée en production biologique ?",
-                "o": [
-                    "Oui, sans restriction",
-                    "Oui, si c'est pour l'alimentation animale",
-                    "Non, l'utilisation d'OGM et de produits dérivés d'OGM est interdite",
-                    "Oui, si < 5%"
-                ],
-                "a": 2,
-                "exp": "L'interdiction des OGM est un principe fondamental de la production biologique (avec une tolérance uniquement pour la présence accidentelle < 0,9%).",
-                "f": "ISO22002027.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1Z8oozvJgsRLCzVqBYfQWz7GliUCzb66D"
-            },
-            {
-                "day": 20,
-                "q": "Selon le Règlement 852/2004, l'analyse des dangers HACCP doit prendre en compte quels types de dangers ?",
-                "o": [
-                    "Uniquement microbiologiques",
-                    "Biologiques, Chimiques et Physiques",
-                    "Uniquement les allergènes",
-                    "Uniquement les corps étrangers"
-                ],
-                "a": 1,
-                "exp": "Le plan HACCP doit identifier, évaluer et maîtriser les dangers significatifs au regard de la sécurité des aliments : biologiques, chimiques (dont allergènes) et physiques.",
-                "f": "detecteurmetaux.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1xQQsHcwyuXe76N-NpkMrvukiQQE9V0zz"
-            },
-            {
-                "day": 21,
-                "q": "En atmosphère modifiée (MAP), quel gaz est principalement utilisé pour ses propriétés bactériostatiques (inhibe la croissance) ?",
-                "o": [
-                    "Azote (N2)",
-                    "Oxygène (O2)",
-                    "Dioxyde de carbone (CO2)",
-                    "Hélium (He)"
-                ],
-                "a": 2,
-                "exp": "Le CO2 est le gaz actif principal en MAP car il se dissout dans la phase aqueuse et grasse, abaissant le pH et inhibant la croissance microbienne.",
-                "f": "Azotegenerateur.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1YPj6GDWhTPCBvReBXmJZbxUSMRiBC5Lo"
-            },
-            {
-                "day": 22,
-                "q": "Quelle est la définition d'un 'Nouvel Aliment' (Novel Food) selon le Règlement (UE) 2015/2283 ?",
-                "o": [
-                    "Un aliment riche en vitamines",
-                    "Un aliment dont la consommation humaine était négligeable dans l'Union avant le 15 mai 1997",
-                    "Un aliment contenant des additifs",
-                    "Un aliment produit en laboratoire uniquement"
-                ],
-                "a": 1,
-                "exp": "La date pivot est le 15 mai 1997. Tout aliment non consommé significativement avant cette date nécessite une autorisation avant mise sur le marché.",
-                "f": "ravageur boulangerie.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=17wJgepcdg_LZG81l4fjkEfqxRdW6KVpq"
-            },
-            {
-                "day": 23,
-                "q": "Selon le Règlement (CE) n° 1333/2008, qu'est-ce qu'un additif alimentaire ?",
-                "o": [
-                    "Un ingrédient agricole normal",
-                    "Une substance non consommée comme aliment en soi, ajoutée intentionnellement pour un but technologique",
-                    "Un contaminant environnemental",
-                    "Une aide technologique éliminée en fin de process"
-                ],
-                "a": 1,
-                "exp": "L'additif est ajouté intentionnellement pour des raisons technologiques (conservation, coloration, texture) et se retrouve dans le produit fini.",
-                "f": "nutriscore.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1cQhaliuP3vtysRedSVlwTK1r22hlqOQG"
-            },
-            {
-                "day": 24,
-                "q": "Quelle norme ISO définit les exigences relatives aux systèmes de management de la sécurité des denrées alimentaires ?",
-                "o": [
-                    "ISO 9001",
-                    "ISO 14001",
-                    "ISO 22000",
-                    "ISO 45001"
-                ],
-                "a": 2,
-                "exp": "L'ISO 22000 est la norme internationale spécifique au management de la sécurité des denrées alimentaires, intégrant l'HACCP.",
-                "f": "aircomprimé.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=13fM84mzhhpxkok5qHj64SJB6BFFvkxdk"
-            },
-            {
-                "day": 25,
-                "q": "Selon le Règlement (UE) n° 10/2011, quel est le symbole utilisé pour indiquer qu'un matériau est apte au contact alimentaire ?",
-                "o": [
-                    "Un triangle de recyclage",
-                    "Un verre et une fourchette",
-                    "Une poubelle barrée",
-                    "Une tête de mort"
-                ],
-                "a": 1,
-                "exp": "Le symbole 'verre et fourchette' indique que le matériau est destiné à entrer en contact avec des denrées alimentaires.",
-                "f": "Listeria2026.pdf",
-                "l": "https://drive.google.com/uc?export=download&id=1LM00Eg7Z2YVgRg7hOSFU6f4tJaBG2XRa"
+                id: 'vague', severity: 'warn',
+                regex: /\b(production|manufacture|processing|preparation|making)\b/gi,
+                title: "Vague Process Term",
+                desc: "Generic terms are discouraged by F931.",
+                tip: "Use specific verbs: Baking, Mixing, Pasteurisation, Packing, Assembling."
             }
         ];
 
-        const now = new Date();
-        const curDay = now.getDate();
-        const isDec = (now.getMonth() === 11);
+        function analyze() {
+            const input = document.getElementById('scopeInput');
+            const view = document.getElementById('viewMode');
+            const list = document.getElementById('issuesList');
+            const raw = input.value.trim();
 
-        // VOS IMAGES GITHUB POUR LE FOND D'ECRAN
-        const bgs = [
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/chad-madden-SUTfFCAHV_A-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/freestocks--Qf9JKLysUg-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/annie-spratt-VDXtVYJVj7A-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/joanna-kosinska-i7q-HTO0SEM-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/kieran-white-SBdmQcW8qag-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/louis-magnotti-Kf8ko_oGN20-unsplash.jpg",
-            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/tessa.jpg"
-        ];
+            if (!raw) return;
 
-        function initBackground() {
-            const bgIndex = curDay % bgs.length;
-            const imgUrl = bgs[bgIndex];
-            const img = new Image();
-            img.onload = () => {
-                document.body.style.backgroundImage = `url('${imgUrl}')`;
-                fadeOutLoader();
-            };
-            // Fallback (on garde la première si erreur)
-            img.onerror = () => fadeOutLoader();
-            img.src = imgUrl;
-        }
+            // Switch to View Mode
+            input.classList.add('hidden');
+            view.classList.remove('hidden');
+            document.getElementById('analyzeBtn').classList.add('hidden');
+            document.getElementById('editBtn').style.display = 'flex';
 
-        function fadeOutLoader() {
-            const l = document.getElementById('loader');
-            l.style.opacity = '0';
-            setTimeout(() => l.style.display='none', 500);
-        }
+            // Clear Results
+            view.innerHTML = '';
+            list.innerHTML = '<div class="panel-header">Analysis Results</div>';
 
-        function initCalendar() {
-            const grid = document.getElementById('grid');
-            if(!QUIZ_DATA || QUIZ_DATA.length === 0) {
-                grid.innerHTML = "<h3 style='background:rgba(0,0,0,0.8); padding:20px; border-radius:10px;'>⚠️ Données manquantes (Admin JSON)</h3>";
-                fadeOutLoader();
-                return;
-            }
+            let score = 100;
+            let findings = [];
+            let globalNotes = [];
 
-            let unlocked = 0;
-
-            QUIZ_DATA.forEach(item => {
-                let status = "locked";
-                if (MODE_DEMO) {
-                    status = (item.day <= curDay) ? "past" : "open";
-                    if (item.day === curDay) status = "today";
-                } else if (isDec) {
-                    if (item.day < curDay) status = "past";
-                    else if (item.day === curDay) status = "today";
+            // 1. Regex Pass
+            RULES.forEach(rule => {
+                let match;
+                rule.regex.lastIndex = 0;
+                while ((match = rule.regex.exec(raw)) !== null) {
+                    if (rule.custom && !rule.custom(raw, match)) continue;
+                    findings.push({ start: match.index, end: match.index + match[0].length, text: match[0], rule: rule });
                 }
-
-                if(status !== 'locked') unlocked++;
-
-                const type = Math.floor(Math.random() * 3);
-                let shapeClass = "shape-snowflake"; 
-                if(type === 1) shapeClass = "shape-ball";
-                else if(type === 2) shapeClass = "shape-gift";
-
-                const box = document.createElement('div');
-                // On utilise les classes shape-xxx qui ont maintenant des background-image
-                box.className = `day-box ${shapeClass} ${status}`;
-                box.innerHTML = `<div class="day-number">${item.day}</div>`;
-
-                if(status !== 'locked') {
-                    box.onclick = () => openModal(item);
-                }
-
-                grid.appendChild(box);
             });
 
-            const pct = (unlocked / QUIZ_DATA.length) * 100;
-            document.getElementById('progressBar').style.width = pct + '%';
-            document.getElementById('progressTxt').innerText = `${unlocked}/${QUIZ_DATA.length}`;
-        }
+            // 2. Global Checks
+            if (raw.split(' ').length > 60) {
+                score -= 5;
+                globalNotes.push({ title: "Scope Too Long", desc: "Your scope exceeds 60 words. F931 recommends keeping it succinct.", type: "warn", tip: "Group similar products together." });
+            }
+            const verbs = ["baking","cooking","mixing","packing","pasteurisation","cutting","slicing","bottling","fermentation"];
+            if (!verbs.some(v => raw.toLowerCase().includes(v))) {
+                score -= 10;
+                globalNotes.push({ title: "Missing Process Verb", desc: "No specific process verb found (e.g. Baking, Bottling).", type: "warn", tip: "Ensure the main technology is described." });
+            }
 
-        function forceDownloadLink(url) {
-            if(!url) return "#";
-            if(url.includes("export=download")) return url;
-            const match = url.match(/\/d\/(.+?)\/|id=(.+?)($|&)/);
-            if(match) return `https://drive.google.com/uc?export=download&id=${match[1] || match[2]}`;
-            return url;
-        }
-
-        let currentItem = null;
-        const modal = document.getElementById('quizModal');
-
-        function openModal(item) {
-            currentItem = item;
-            document.getElementById('m-day').innerText = `Jour ${item.day}`;
-            document.getElementById('m-question').innerText = item.q;
-            document.getElementById('m-feedback').style.display = 'none';
-            modal.classList.add('visible');
-
-            const opts = document.getElementById('m-options');
-            opts.innerHTML = "";
-            item.o.forEach((txt, i) => {
-                const btn = document.createElement('button');
-                btn.className = "option-btn";
-                btn.innerText = txt;
-                btn.onclick = () => checkAnswer(i, btn);
-                opts.appendChild(btn);
+            // 3. Render Highlights & Issues
+            findings.sort((a,b) => a.start - b.start);
+            let last = 0;
+            findings.forEach(f => {
+                // Text before
+                view.appendChild(document.createTextNode(raw.substring(last, f.start)));
+                // Highlight
+                const span = document.createElement('span');
+                span.className = `mark ${f.rule.severity}`;
+                span.innerText = raw.substring(f.start, f.end);
+                span.onclick = () => scrollToIssue(f.rule.id);
+                view.appendChild(span);
+                
+                // Add card to list (prevent duplicates visually if same error appears multiple times? typically list all)
+                // For cleaner UI, we list all.
+                addIssueCard(f.rule, f.text);
+                
+                score -= (f.rule.severity === 'crit' ? 15 : 5);
+                last = f.end;
             });
-        }
+            view.appendChild(document.createTextNode(raw.substring(last)));
 
-        function checkAnswer(idx, btn) {
-            const btns = document.querySelectorAll('.option-btn');
-            btns.forEach(b => b.disabled = true);
+            // 4. Render Global Notes
+            globalNotes.forEach(n => addGlobalCard(n));
 
-            const isCorrect = (idx === currentItem.a);
-            btn.classList.add(isCorrect ? 'correct' : 'incorrect');
-            
-            const audio = document.getElementById(isCorrect ? 'snd-win' : 'snd-fail');
-            try { audio.currentTime=0; audio.play(); } catch(e){}
+            // 5. Update Score
+            score = Math.max(0, score);
+            updateScoreUI(score);
 
-            if(!isCorrect) {
-                if(btns[currentItem.a]) btns[currentItem.a].classList.add('correct');
+            if(findings.length === 0 && globalNotes.length === 0) {
+                list.innerHTML += `
+                <div class="issue-item good">
+                    <div class="issue-title" style="color:#047857">✅ No Issues Found</div>
+                    <div class="issue-desc">Your scope appears to be compliant with F931 guidelines.</div>
+                </div>`;
             }
+        }
 
-            document.getElementById('m-exp').innerHTML = (isCorrect ? "✅ <b>Exact !</b> " : "❌ <b>Incorrect.</b> ") + (currentItem.exp || "");
-            const link = document.getElementById('m-link');
-            link.href = forceDownloadLink(currentItem.l);
-            link.innerHTML = `📥 ${currentItem.f || 'Télécharger'}`;
+        function addIssueCard(rule, text) {
+            const list = document.getElementById('issuesList');
+            const div = document.createElement('div');
+            // Unique ID for scrolling (add random suffix if multiple same errors)
+            const uid = `issue-${rule.id}-${Math.floor(Math.random()*1000)}`;
+            div.className = `issue-item ${rule.severity}`;
+            div.id = uid;
             
-            document.getElementById('m-feedback').style.display = 'block';
+            // Map highlighting back to this card
+            // Note: simple mapping for this demo
+            
+            div.innerHTML = `
+                <div class="issue-title ${rule.severity}">
+                    ${rule.severity === 'crit' ? '❌ Critical Issue' : '⚠️ Warning'} : ${rule.title}
+                </div>
+                <div class="issue-desc">
+                    "${text}" - ${rule.desc}
+                </div>
+                <div class="suggestion">💡 Tip: ${rule.tip}</div>
+            `;
+            list.appendChild(div);
+            
+            // Re-bind the click event on the last created span to this specific card
+            // (A simplified approach for the demo)
         }
 
-        function closeModal() { modal.classList.remove('visible'); }
+        function addGlobalCard(note) {
+            const list = document.getElementById('issuesList');
+            const div = document.createElement('div');
+            div.className = `issue-item ${note.type}`;
+            div.innerHTML = `
+                <div class="issue-title ${note.type}">⚠️ ${note.title}</div>
+                <div class="issue-desc">${note.desc}</div>
+                ${note.tip ? `<div class="suggestion">💡 Tip: ${note.tip}</div>` : ''}
+            `;
+            list.prepend(div);
+        }
 
-        function startSnow(){
-            const cvs = document.getElementById('snowCanvas');
-            const ctx = cvs.getContext('2d');
-            let w, h, flakes=[];
-            const rz = ()=>{w=cvs.width=window.innerWidth; h=cvs.height=window.innerHeight;};
-            window.addEventListener('resize', rz); rz();
-            for(let i=0;i<50;i++) flakes.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*3+1,s:Math.random()+0.5});
-            function draw(){
-                ctx.clearRect(0,0,w,h); ctx.fillStyle="rgba(255,255,255,0.6)"; ctx.beginPath();
-                flakes.forEach(f=>{ctx.moveTo(f.x,f.y);ctx.arc(f.x,f.y,f.r,0,Math.PI*2);f.y+=f.s;if(f.y>h)f.y=-5;});
-                ctx.fill(); requestAnimationFrame(draw);
+        function updateScoreUI(score) {
+            const ring = document.getElementById('scoreRing');
+            const val = document.getElementById('scoreVal');
+            const label = document.getElementById('scoreLabel');
+            
+            const offset = 283 - (score / 100 * 283);
+            ring.style.strokeDashoffset = offset;
+            
+            let color = '#3B82F6'; 
+            let text = "Needs Tweaks";
+            
+            if (score >= 90) { color = '#10B981'; text = "Excellent"; }
+            else if (score >= 70) { color = '#3B82F6'; text = "Good"; }
+            else if (score < 50) { color = '#EF4444'; text = "Critical Issues"; }
+            
+            ring.style.stroke = color;
+            val.innerText = score + '%';
+            label.innerText = text;
+        }
+
+        function toggleEdit() {
+            document.getElementById('scopeInput').classList.remove('hidden');
+            document.getElementById('viewMode').classList.add('hidden');
+            document.getElementById('analyzeBtn').classList.remove('hidden');
+            document.getElementById('editBtn').style.display = 'none';
+        }
+
+        function scrollToIssue(id) {
+            // Find the first card with that rule ID prefix
+            const cards = document.querySelectorAll(`[id^="issue-${id}"]`);
+            if(cards.length > 0) {
+                cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                cards[0].style.transform = "scale(1.02)";
+                setTimeout(() => cards[0].style.transform = "scale(1)", 200);
             }
-            draw();
         }
 
-        startSnow();
-        initBackground();
-        initCalendar();
+        function resetApp() {
+            document.getElementById('scopeInput').value = '';
+            toggleEdit();
+            document.getElementById('issuesList').innerHTML = `
+                <div style="text-align:center; padding: 40px; color:#9CA3AF; background:white; border-radius:12px; border: 2px dashed #E5E7EB;">
+                    <div style="font-size:2.5rem; margin-bottom:15px; opacity:0.5;">🛡️</div>
+                    <div style="font-size:1.1rem; font-weight:600;">Ready to Analyze</div>
+                    <p>Enter your scope text above and click the green button.</p>
+                </div>`;
+            updateScoreUI(0);
+            document.getElementById('scoreLabel').innerText = "Waiting for input";
+            document.getElementById('charCount').innerText = "0 chars";
+            document.getElementById('scoreRing').style.strokeDashoffset = 283;
+        }
+
+        function loadDemo() {
+            document.getElementById('scopeInput').value = "Mixing, cooking, pasteurization, packing, freezing of meat paste, meat extract and animal fat in buckets, plastic pouches or bulk containers. Mixing, cooking, drying, packing of dried culinary bases (soup, broth, meat powder) in non-woven plastic filter and plastic bags. Preparation by mixing of dehydrated ingredients, grinding, packing of dehydrated miso soups into laminated bags or plastic pots. Including outsourced packing of dehydrated miso soups and dry broths into laminated bags or plastic pots.";
+            document.getElementById('charCount').innerText = document.getElementById('scopeInput').value.length + " chars";
+            analyze();
+        }
+
+        function copyText() {
+            const txt = document.getElementById('scopeInput').value;
+            if(txt) {
+                navigator.clipboard.writeText(txt);
+                alert("Copied to clipboard");
+            }
+        }
+
+        document.getElementById('scopeInput').addEventListener('input', function() {
+            document.getElementById('charCount').innerText = this.value.length + " chars";
+        });
 
     </script>
 </body>
 </html>
-
