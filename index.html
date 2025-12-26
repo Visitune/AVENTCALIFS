@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meilleurs Vœux 2026 - Food Safety & Visipilot</title>
+    <!-- Polices Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Playfair+Display:wght@700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-red: #d42426;
+            --gold: #f8b229;
+            --dark-bg: #0b0c10;
+            --glass: rgba(255, 255, 255, 0.1);
+            --img-bauble: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/boule.png');
+            --img-gift: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/couronne.png'); 
+            --img-flake: url('https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/snowflake.png');
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            transition: background-image 1.5s ease-in-out;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.65); z-index: -1;
+        }
+
+        #snowCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        .main-container {
+            width: 100%; max-width: 1000px; padding: 2rem;
+            z-index: 1; flex-grow: 1;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+        }
+
+        /* CARTE DE VOEUX 2026 */
+        .wishes-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 30px;
+            padding: 4rem 2rem;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .wishes-card h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem; color: var(--gold);
+            margin: 0 0 1rem 0;
+            text-shadow: 0 0 20px rgba(248, 178, 41, 0.4);
+        }
+
+        .wishes-subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+
+        .bilingual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            text-align: left;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+        }
+
+        .lang-block h3 { color: var(--gold); font-family: 'Roboto'; font-weight: 700; margin-bottom: 10px; }
+        .lang-block p { line-height: 1.7; font-size: 1.1rem; font-weight: 300; }
+
+        /* GRILLE DE DECORATION (NON CLIQUABLE) */
+        .decoration-grid {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 20px; opacity: 0.6; margin-bottom: 4rem;
+        }
+
+        .day-box {
+            width: 60px; height: 60px;
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            display: flex; justify-content: center; align-items: center;
+            filter: grayscale(0.5);
+        }
+        .day-box.shape-ball { background-image: var(--img-bauble); }
+        .day-box.shape-gift { background-image: var(--img-gift); }
+        .day-box.shape-flake { background-image: var(--img-flake); }
+        .day-number { font-family: 'Mountains of Christmas'; font-size: 1.2rem; color: #fff; margin-top: 5px; }
+
+        /* FOOTER DE CONTACT */
+        footer {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            padding: 3rem 1rem;
+            border-top: 1px solid rgba(255,215,0,0.2);
+        }
+
+        .contact-container {
+            max-width: 800px; margin: 0 auto;
+        }
+
+        .contact-msg { font-size: 1.2rem; margin-bottom: 1.5rem; color: #eee; }
+
+        .btn-group {
+            display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+        }
+
+        .btn-contact {
+            padding: 12px 30px; border-radius: 50px; text-decoration: none;
+            font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 10px;
+        }
+
+        .btn-web { background: white; color: var(--dark-bg); }
+        .btn-linkedin { background: #0077b5; color: white; }
+
+        .btn-contact:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+
+        @media (max-width: 768px) {
+            .bilingual-grid { grid-template-columns: 1fr; }
+            .wishes-card h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="snowCanvas"></canvas>
+
+    <div class="main-container">
+        
+        <div class="wishes-card">
+            <div class="wishes-subtitle">Food Safety Excellence</div>
+            <h1>Happy New Year 2026</h1>
+            
+            <div class="bilingual-grid">
+                <div class="lang-block">
+                    <h3>Merci ! </h3>
+                    <p>La période du Calendrier de l'Avent est désormais terminée. Nous espérons que ces 25 jours de défis vous ont plu.</p>
+                    <p>Toute l'équipe vous souhaite une année 2026 pleine de réussite, de santé et de sécurité !</p>
+                </div>
+                <div class="lang-block">
+                    <h3>Thank you!</h3>
+                    <p>The Advent Calendar period has now come to an end. We hope you enjoyed these 25 days of challenges.</p>
+                    <p>The entire team wishes you a 2026 full of success, health, and food safety excellence!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="decoration-grid" id="grid">
+            <!-- Rempli par JS -->
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="contact-container">
+            <p class="contact-msg">Besoin d'un accompagnement ou d'une information ? / Need support?</p>
+            <div class="btn-group">
+                <a href="https://visipilot.com" target="_blank" class="btn-contact btn-web">
+                    🌐 Visitez Visipilot.com
+                </a>
+                <a href="https://www.linkedin.com/company/visipilot-conseil/" target="_blank" class="btn-contact btn-linkedin">
+                    Linked<span>In</span> - Suivez-nous
+                </a>
+            </div>
+            <div style="margin-top: 2rem;">
+                <img src="https://raw.githubusercontent.com/M00N69/BUSCAR/main/logo%2002%20copie.jpg" alt="Visipilot" style="height: 50px; background: white; padding: 5px; border-radius: 5px;">
+                <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">© 2025-2026 Visipilot - Expertise Sécurité Alimentaire</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FONDS D'ÉCRAN DYNAMIQUES
+        const bgs = [
+            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/chad-madden-SUTfFCAHV_A-unsplash.jpg",
+            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/freestocks--Qf9JKLysUg-unsplash.jpg",
+            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/annie-spratt-VDXtVYJVj7A-unsplash.jpg",
+            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/joanna-kosinska-i7q-HTO0SEM-unsplash.jpg",
+            "https://raw.githubusercontent.com/Visitune/AVENTCALIFS/main/asset/kieran-white-SBdmQcW8qag-unsplash.jpg"
+        ];
+
+        function setDynamicBG() {
+            const day = new Date().getDate();
+            const bgUrl = bgs[day % bgs.length];
+            document.body.style.backgroundImage = `url('${bgUrl}')`;
+        }
+
+        // GÉNÉRATION DE LA GRILLE DÉCO
+        function initDecoGrid() {
+            const grid = document.getElementById('grid');
+            for(let i=1; i<=25; i++) {
+                const shapes = ['ball', 'gift', 'flake'];
+                const shape = shapes[i % 3];
+                const box = document.createElement('div');
+                box.className = `day-box shape-${shape}`;
+                box.innerHTML = `<span class="day-number">${i}</span>`;
+                grid.appendChild(box);
+            }
+        }
+
+        // EFFET NEIGE
+        function startSnow(){
+            const cvs = document.getElementById('snowCanvas');
+            const ctx = cvs.getContext('2d');
+            let w, h, flakes=[];
+            const rz = ()=>{w=cvs.width=window.innerWidth; h=cvs.height=window.innerHeight;};
+            window.addEventListener('resize', rz); rz();
+            for(let i=0;i<70;i++) flakes.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*3+1,s:Math.random()+0.4});
+            function draw(){
+                ctx.clearRect(0,0,w,h); ctx.fillStyle="rgba(255,255,255,0.6)"; ctx.beginPath();
+                flakes.forEach(f=>{ctx.moveTo(f.x,f.y);ctx.arc(f.x,f.y,f.r,0,Math.PI*2);f.y+=f.s;if(f.y>h)f.y=-5;});
+                ctx.fill(); requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        window.onload = () => {
+            setDynamicBG();
+            initDecoGrid();
+            startSnow();
+        };
+    </script>
+</body>
+</html>
